@@ -43,7 +43,8 @@ inode/symlink | inode/chardevice)
     file -b "$1"
     ;;
 application/x-iso9660-image)
-    iso-info --no-header "$1"
+    iso-info --no-header --show-rock-ridge 0 -l "$1" | nvimpager -c +"setf log"
+    echo "__________________________________"
     hexdump -C "$1" | head -$LINES | $PYGMENTIZE_CMD -l hexdump
     ;;
 # odt
@@ -54,19 +55,26 @@ application/vnd.oasis.* | application/vnd.openxmlformats*)
     head -$LINES "$1" | column -s, -t
     ;;
 application/json)
-    jq <"$1" | $PYGMENTIZE_CMD -l json
+    jq <"$1" | nvimpager -c +"setf json"
     ;;
 application/*sqlite3)
-    sqlite3 "$1" .dump | head -$LINES | $PYGMENTIZE_CMD -l sql
+    sqlite3 "$1" .dump | head -$LINES | nvimpager -c +"setf sql"
     ;;
 application/gzip)
     gzip --uncompress -c "$1" | head -$LINES | $HIGHLIGHT_CMD --syntax md
     # gzip -l "$1" | $HIGHLIGHT_CMD --syntax ls
     ;;
-application/octet-stream | inode/* | text/x-bytecode*)
-    file -b "$1"
-    echo "------------------------------------------------------------+----------------+"
-    hexdump -C "$1" | head -$LINES | $PYGMENTIZE_CMD -l hexdump
+application/octet-stream | inode/* | text/x-bytecode* | application/x-object)
+    case "$(file -b "$1")" in
+    "Apple binary property list")
+        plistutil -i "$1" | nvimpager -c +"setf xml"
+        ;;
+    *)
+        file -b "$1"
+        echo "------------------------------------------------------------+----------------+"
+        hexdump -C "$1" | head -$LINES | $PYGMENTIZE_CMD -l hexdump
+        ;;
+    esac
     ;;
 *)
     case $1 in
@@ -90,12 +98,24 @@ application/octet-stream | inode/* | text/x-bytecode*)
         head -$LINES "$1" | $HIGHLIGHT_CMD --syntax json
         ;;
     *)
-        if command -v nvimpager >/dev/null 2>&1; then
-            nvimpager -c "$1"
-        else
-            $PYGMENTIZE_CMD -g "$1"
-            # $PYGMENTIZE_CMD -g "$1" || sudo $PYGMENTIZE_CMD -g "$1"
-        fi
+        case "$(file -b "$1")" in
+        "ASCII text, with very long lines"*)
+            jq_output=$(jq <"$1" 2>/dev/null | head -$LINES)
+            if [ "$jq_output" ]; then
+                nvimpager -c +"setf json" <"$jq_output"
+            else
+                nvimpager -c "$1"
+            fi
+            ;;
+        *)
+            if command -v nvimpager >/dev/null 2>&1; then
+                nvimpager -c "$1"
+            else
+                $PYGMENTIZE_CMD -g "$1"
+                # $PYGMENTIZE_CMD -g "$1" || sudo $PYGMENTIZE_CMD -g "$1"
+            fi
+            ;;
+        esac
         ;;
     esac
     ;;
