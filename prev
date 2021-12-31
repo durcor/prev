@@ -8,7 +8,7 @@ PYGMENTIZE_CMD="pygmentize -f terminal"
 
 # kitty +kitten icat --transfer-mode file --clear
 
-case "$(file --mime-type "$1" -bL)" in
+case "$(file -b --mime-type "$1")" in
 audio/*)
     mediainfo "$1" | $PYGMENTIZE_CMD -l make
     ;;
@@ -39,7 +39,11 @@ application/zstd)
     # zstdcat "$1" | head -n30
     tar -tf "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
     ;;
-inode/symlink | inode/chardevice)
+inode/symlink)
+    # Shell recursion >:^)
+    $0 "$(readlink -f "$1")"
+    ;;
+inode/chardevice)
     file -b "$1"
     ;;
 application/x-iso9660-image)
