@@ -10,3 +10,4 @@ install:
 test:
 	shellcheck $(shell which prev)
 	prev
+	prev
