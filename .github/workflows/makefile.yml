@@ -16,6 +16,7 @@ jobs:
           git clone https://github.com/lucc/nvimpager
           cd nvimpager
           sudo make install
+          cd ..
       - name: Install
         run: make install
       - name: Test
