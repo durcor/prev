@@ -2,8 +2,11 @@ language: sh
 sudo: required
 
 before_install:
-  - sudo apt install scdoc
-  - sudo apt install nvimpager
+  - git clone https://git.sr.ht/~sircmpwn/scdoc/
+  - cd scdoc
+  - make
+  - sudo make install
+  - cd ..
   - git clone https://github.com/lucc/nvimpager
   - cd nvimpager
   - make install
