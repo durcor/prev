@@ -1,5 +1,5 @@
 if empty(glob('$XDG_DATA_HOME/nvimpager/site/autoload/plug.vim'))
-  silent !curl -fLo $XDG_DATA_HOME/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  silent !curl -fLo $XDG_DATA_HOME/nvimpager/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   au VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
