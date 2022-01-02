@@ -3,14 +3,8 @@ dist: focal
 sudo: required
 
 before_install:
-  - git clone https://git.sr.ht/~sircmpwn/scdoc
-  - cd scdoc
-  - sudo make install
-  - cd ..
-  - git clone https://github.com/neovim/neovim
-  - make CMAKE_BUILD_TYPE=RelWithDebInfo
-  - sudo make install
-  - cd ..
+  - sudo add-apt-repository universe
+  - sudo apt install scdoc neovim
   - git clone https://github.com/lucc/nvimpager
   - cd nvimpager
   - sudo make install
