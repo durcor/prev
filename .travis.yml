@@ -9,7 +9,7 @@ before_install:
   - cd ..
   - git clone https://github.com/lucc/nvimpager
   - cd nvimpager
-  - make install
+  - sudo make install
 
 script:
   - shellcheck prev
