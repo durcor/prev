@@ -20,7 +20,7 @@ set previewer prev
 
 ## Installation
 ```sh
-./install.sh
+sudo make install
 ```
 
 ## Dependencies:

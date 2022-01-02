@@ -12,5 +12,5 @@ before_install:
   - cd ..
 
 script:
-  - shellcheck prev
-  - ./prev
+  - sudo make install
+  - make test
