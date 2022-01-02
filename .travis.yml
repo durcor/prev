@@ -3,7 +3,7 @@ dist: focal
 sudo: required
 
 before_install:
-  - sudo apt install scdoc nvim
+  - sudo apt install scdoc neovim
   - git clone https://github.com/lucc/nvimpager
   - cd nvimpager
   - sudo make install
