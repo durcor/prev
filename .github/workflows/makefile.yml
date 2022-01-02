@@ -18,6 +18,6 @@ jobs:
           sudo make install
           cd ..
       - name: Install
-        run: ls && make install
+        run: cd .. && ls && make install
       - name: Test
         run: make test
