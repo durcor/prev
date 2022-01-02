@@ -1,43 +1,66 @@
 #!/bin/sh
 
+# LINES=$(tput lines)
 LINES=100
+# COLUMNS=$(tput cols)
+COLUMNS=100
 
-HIGHLIGHT_THEME="${XDG_CACHE_HOME:-$HOME/.cache}/wal/pywal.theme"
-HIGHLIGHT_CMD="highlight -O ansi -s $HIGHLIGHT_THEME"
-PYGMENTIZE_CMD="pygmentize -f terminal"
+# TODO: Need to find a better syntax file for hexdumps
 
 # kitty +kitten icat --transfer-mode file --clear
 
+optimize() {
+    head -$LINES </dev/stdin | colrm $COLUMNS | nvimpager -c +"setf $1"
+}
+
+# Format input based on file type
+parse() {
+    case $1 in
+    csv) column -s, -o, -t "$2" | optimize csv ;;
+    pdf) pdftotext "$2" - | optimize log ;;
+    esac
+}
+
+# Wrap around libreoffice's --convert-to option and clean up when done.
+libreoffice_wrapper() {
+    tmp=$(mktemp -p /tmp -d prev.XXX)
+    libreoffice --headless --convert-to "$1" "$2" --outdir "$tmp"
+    parse "$1" "$tmp/"*
+    rm -r "$tmp"
+}
+
 case "$(file -b --mime-type "$1")" in
 audio/*)
-    mediainfo "$1" | $PYGMENTIZE_CMD -l make
+    mediainfo "$1" | optimize make
     ;;
 video/*)
-    ffmpegthumbnailer -i "$1" -o /tmp/ffmpegthumbnailer.png
-    chafa -c 256 /tmp/ffmpegthumbnailer.png
-    mediainfo "$1" | $PYGMENTIZE_CMD -l make
+    tmp=$(mktemp -p /tmp prevffmpegthumbnailer.XXX.png)
+    ffmpegthumbnailer -i "$1" -o "$tmp"
+    chafa -c 256 "$tmp"
+    mediainfo "$1" | optimize make
+    rm "$tmp"
     ;;
 image/vnd.djvu)
-    djvutxt "$1"
+    djvutxt "$1" | optimize log
     ;;
 application/pdf)
-    pdftotext "$1" -
+    parse pdf "$1"
     ;;
 image/*)
     chafa -c 256 "$1"
     # kitty +kitten icat --transfer-mode file --place 80x40@88x1 --silent "$1"
     # ueberview "$1"
-    mediainfo "$1" | $PYGMENTIZE_CMD -l make
+    mediainfo "$1" | optimize make
     ;;
 application/zip)
-    zipinfo "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
+    zipinfo "$1" | optimize lsl
     ;;
 application/x-7z-compressed | application/x-rar)
-    7z l -pa "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
+    7z l -pa "$1" | optimize lsl
     ;;
 application/zstd)
     # zstdcat "$1" | head -n30
-    tar -tf "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
+    tar -tf "$1" | optimize lsl
     ;;
 inode/symlink)
     # Shell recursion >:^)
@@ -47,77 +70,102 @@ inode/chardevice)
     file -b "$1"
     ;;
 application/x-iso9660-image)
-    iso-info --no-header --show-rock-ridge 0 -l "$1" | nvimpager -c +"setf log"
+    iso-info --no-header --show-rock-ridge 0 -l "$1" | optimize log
     echo "__________________________________"
-    hexdump -C "$1" | head -$LINES | $PYGMENTIZE_CMD -l hexdump
+    hexdump -C "$1" | optimize log | head -10
+    echo "__________________________________"
+    # shellcheck disable=SC2046,2005
+    echo $(strings "$1") | fold -w 80
+    ;;
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
+    libreoffice_wrapper csv "$1"
+    ;;
+application/vnd.openxmlformats-officedocument.presentationml.presentation)
+    libreoffice_wrapper pdf "$1"
     ;;
 # odt
-application/vnd.oasis.* | application/vnd.openxmlformats*)
-    pandoc "$1" -t markdown | $HIGHLIGHT_CMD --syntax markdown
+application/vnd.oasis.* | application/vnd.openxmlformats* | application/msword)
+    # pandoc "$1" -t markdown | $HIGHLIGHT_CMD --syntax markdown
+    libreoffice_wrapper txt "$1"
     ;;
 */csv)
-    head -$LINES "$1" | column -s, -t
+    parse csv "$1"
     ;;
 application/json)
-    jq <"$1" | nvimpager -c +"setf json"
+    jq <"$1" | optimize json
     ;;
 application/*sqlite3)
-    sqlite3 "$1" .dump | head -$LINES | nvimpager -c +"setf sql"
+    sqlite3 "$1" .dump | optimize sql
+    ;;
+application/x-xz)
+    case $1 in
+    *.tar.xz*) tar -tvf "$1" ;;
+    *) xzcat "$1" ;;
+    esac | optimize lsl
     ;;
 application/gzip)
-    gzip --uncompress -c "$1" | head -$LINES | $HIGHLIGHT_CMD --syntax md
-    # gzip -l "$1" | $HIGHLIGHT_CMD --syntax ls
-    ;;
-application/octet-stream | inode/* | text/x-bytecode* | application/x-object)
-    case "$(file -b "$1")" in
-    "Apple binary property list")
-        plistutil -i "$1" | nvimpager -c +"setf xml"
+    case $1 in
+    *.tar.gz* | .tgz*)
+        tar -ztvf "$1" | optimize lsl
         ;;
     *)
-        file -b "$1"
-        echo "------------------------------------------------------------+----------------+"
-        hexdump -C "$1" | head -$LINES | $PYGMENTIZE_CMD -l hexdump
+        gzip --uncompress -c "$1" | optimize log
+        # gzip -l "$1" | $HIGHLIGHT_CMD --syntax ls
         ;;
     esac
     ;;
+application/x-bzip2)
+    # NOTE: Get more verbose output with -v flag
+    tar -jtvf "$1" | optimize lsl
+    ;;
+application/octet-stream | inode/* | text/x-bytecode* | application/x-object | \
+    application/x-pie-* | application/x-dos* | application/x-sharedlib | \
+    application/x-msi | application/x-matlab-data | application/x-executable | \
+    application/x-hdf5)
+    case "$(file -b "$1")" in
+    "Apple binary property list")
+        plistutil -i "$1" | optimize xml
+        ;;
+    *)
+        file -b "$1"
+        tput setaf 13
+        echo "------------------------------------------------------------+----------------+"
+        hexdump -C "$1" | optimize log | head -10
+        echo "------------------------------------------------------------+----------------+"
+        # shellcheck disable=SC2046,2005
+        echo $(strings "$1") | fold -w 80
+        ;;
+    esac
+    ;;
+application/x-tar)
+    tar -tvf "$1" | optimize lsl
+    ;;
 *)
     case $1 in
-    *.tar.gz | *.tgz)
-        tar -ztvf "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
-        ;;
-    *.tar.bz2)
-        # NOTE: Get more verbose output with -v flag
-        tar -jtvf "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
-        ;;
-    *.tar.xz)
-        tar -tvf "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
-        ;;
-    *.tar)
-        tar -tvf "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
-        ;;
-    *.xz)
-        xzcat "$1" | head -$LINES | $PYGMENTIZE_CMD -l lsl
-        ;;
     *.res)
-        head -$LINES "$1" | $HIGHLIGHT_CMD --syntax json
+        optimize json <"$1"
+        ;;
+    *.vdf* | *.acf | *_legacy.bin) # Steam files
+        optimize yaml <"$1"
+        ;;
+    *.mesh)
+        sed 's/]/]\n/g' <"$1" | optimize glsl
+        ;;
+    *.rbxm)
+        optimize xml <"$1"
         ;;
     *)
         case "$(file -b "$1")" in
         "ASCII text, with very long lines"*)
-            jq_output=$(jq <"$1" 2>/dev/null | head -$LINES)
+            jq_output=$(jq <"$1" 2>/dev/null | optimize)
             if [ "$jq_output" ]; then
-                nvimpager -c +"setf json" <"$jq_output"
+                optimize json <"$jq_output"
             else
                 nvimpager -c "$1"
             fi
             ;;
         *)
-            if command -v nvimpager >/dev/null 2>&1; then
-                nvimpager -c "$1"
-            else
-                $PYGMENTIZE_CMD -g "$1"
-                # $PYGMENTIZE_CMD -g "$1" || sudo $PYGMENTIZE_CMD -g "$1"
-            fi
+            nvimpager -c "$1"
             ;;
         esac
         ;;
