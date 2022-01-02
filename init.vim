@@ -58,9 +58,9 @@ au BufRead /tmp/vimv.* se ft=ls | normal $T/
 " jump straight to the file name in vimv if you are given the ability to edit
 " the entire path (such as when called inside of lf)
 " " Edit extension of current file in vimv
-" autocmd BufRead,BufNewFile /tmp/vimv.ext* normal $T.C
+" autocmd BufRead /tmp/vimv.ext* normal $T.C
 
 " spell checking for LaTeX, markdown, plaintext, and git commits
-au FileType tex,markdown,gitcommit,vimwiki,text setlocal spell spelllang=en_us,es
+" au FileType tex,markdown,gitcommit,vimwiki,text setlocal spell spelllang=en_us,es
 syntax on
 se nocompatible
