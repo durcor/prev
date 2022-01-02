@@ -15,14 +15,7 @@ jobs:
     - uses: actions/checkout@v2
       
     - name: Install dependencies
-      run:
-          - sudo add-apt-repository universe
-          - sudo apt update
-          - sudo apt install scdoc neovim
-          - git clone https://github.com/lucc/nvimpager
-          - cd nvimpager
-          - sudo make install
-          - cd ..
+      run: sudo add-apt-repository universe && sudo apt update && sudo apt install scdoc neovim && git clone https://github.com/lucc/nvimpager && cd nvimpager && sudo make install && cd ..
       
     - name: Install
       run: make install
