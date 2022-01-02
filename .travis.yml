@@ -1,12 +1,9 @@
 language: sh
+dist: focal
 sudo: required
 
 before_install:
-  - git clone https://git.sr.ht/~sircmpwn/scdoc/
-  - cd scdoc
-  - make
-  - sudo make install
-  - cd ..
+  - sudo apt install scdoc nvim
   - git clone https://github.com/lucc/nvimpager
   - cd nvimpager
   - sudo make install
