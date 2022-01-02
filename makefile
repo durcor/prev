@@ -10,4 +10,4 @@ install:
 test:
 	shellcheck $(shell which prev)
 	prev
-	prev
+	for f in $(shell ls -a); do prev "$$f"; done
