@@ -1,4 +1,11 @@
 language: sh
+sudo: required
+
+before_install:
+  - git clone https://github.com/lucc/nvimpager
+  - cd nvimpager
+  - make install
+
 script:
   - shellcheck prev
   - ./prev
