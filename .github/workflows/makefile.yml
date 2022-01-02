@@ -13,11 +13,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Fetch dependencies
         run: |
-          apt install scdoc neovim
+          sudo apt install scdoc neovim
           git clone https://github.com/lucc/nvimpager
           cd nvimpager
-          make install
+          sudo make install
       - name: Install
-        run: make install
+        run: sudo make install
       - name: Test
         run: make test
