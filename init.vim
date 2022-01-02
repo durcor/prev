@@ -1,9 +1,12 @@
 if empty(glob('$XDG_DATA_HOME'))
     let $XDG_DATA_HOME = glob('$HOME/.local/share')
 endif
+if empty(glob('$XDG_CONFIG_HOME'))
+    let $XDG_CONFIG_HOME = glob('$HOME/.config')
+endif
 if empty(glob('$XDG_DATA_HOME/nvimpager/site/autoload/plug.vim'))
   silent !curl -fLo $XDG_DATA_HOME/nvimpager/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  au VimEnter * PlugInstall --sync | source $MYVIMRC
+  au VimEnter * PlugInstall --sync | source glob('$XDG_CONFIG_HOME/nvimpager/init.vim')
 endif
 
 call plug#begin('$XDG_DATA_HOME/nvimpager/plug')
