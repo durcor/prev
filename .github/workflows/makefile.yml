@@ -10,14 +10,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Fetch dependencies
         run: |
-          sudo apt install scdoc neovim
+          apt install scdoc neovim
           git clone https://github.com/lucc/nvimpager
           cd nvimpager
-          sudo make install
-          cd ..
+          make install
       - name: Install
-        run: cd .. && ls && make install
+        run: make install
       - name: Test
         run: make test
