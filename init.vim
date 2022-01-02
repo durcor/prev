@@ -29,18 +29,24 @@ colorscheme wpgtk
 " lua require'nvim-treesitter.configs'.setup{ensure_installed="maintained",highlight={enable=true,additional_vim_regex_highlighting=true}}
 "
 " File-type specific configuration
-" set calcurse note files to be markdown
 au BufRead *.hex se ft=c
 " Better systemd/config file syntax highlighting
-au BufRead *.conf,*.cfg,*.service*,*.timer*,config,*rc se ft=dosini
+au BufRead *.conf,*.cfg,*.service*,*.timer*,*.godot,config,*rc,*.info,*.cir,*.CIR,*.cmp se ft=dosini
 au BufRead *.s,*.lst se ft=arm
 " I need syntax highlighting for my natural joins
 let g:sql_type_default = 'pgsql'
 au BufRead *.css.* se ft=css
 au BufRead *.log*,*.txt se ft=log
-au BufRead *.*patch se ft=gitsendemail
+au BufRead CMakeLists.txt se ft=cmake
+au BufRead README,LICENSE,TODO,NEWS,FAQ,LEGACY se ft=markdown
+au BufRead *.*patch,*.diff se ft=gitsendemail
+au BufRead .gitattributes se ft=gitignore
 au BufRead *.rasi se ft=yaml
 au BufRead *.fut se ft=ocaml
+au BufRead *.python* se ft=python
+au BufRead *.reg se ft=registry
+au BufRead *.mesh se ft=glsl
+au BufRead *.rbxm se ft=xml
 
 " use ls syntax highlighting for vimv buffers
 au BufRead /tmp/vimv.* se ft=ls | normal $T/
