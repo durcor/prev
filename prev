@@ -151,8 +151,8 @@ application/x-tar)
     *)
         case "$(file -b "$1")" in
         "ASCII text, with very long lines"*)
-            jq_output=$(jq <"$1" 2>/dev/null | optimize)
-            if [ "$jq_output" ]; then
+            jq_output=$(jq <"$1" 2>/dev/null)
+            if [ "$?" = 0 ]; then
                 optimize json <"$jq_output"
             else
                 nvimpager -c "$1"
