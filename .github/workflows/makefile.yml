@@ -12,8 +12,11 @@ jobs:
     steps:
       - name: Fetch dependencies
         run: |
-          sudo apt install scdoc neovim && git clone https://github.com/lucc/nvimpager && cd nvimpager && sudo make install
+          sudo apt install scdoc neovim
+          git clone https://github.com/lucc/nvimpager
+          cd nvimpager
+          sudo make install
       - name: Install
-        run: sudo make install
+        run: make install
       - name: Test
         run: make test
