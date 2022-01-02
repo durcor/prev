@@ -8,17 +8,16 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-      
-    - name: Install dependencies
-      run: sudo add-apt-repository universe && sudo apt update && sudo apt install scdoc neovim && git clone https://github.com/lucc/nvimpager && cd nvimpager && sudo make install && cd ..
-      
-    - name: Install
-      run: sudo make install
-
-    - name: Test
-      run: make test
+      - name: Fetch dependencies
+        run: |
+          sudo apt install scdoc neovim
+          git clone https://github.com/lucc/nvimpager
+          cd nvimpager
+          sudo make install
+          cd ..
+      - name: Install
+        run: sudo make install
+      - name: Test
+        run: make test
