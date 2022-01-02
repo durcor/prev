@@ -5,8 +5,6 @@ LINES=100
 # COLUMNS=$(tput cols)
 COLUMNS=100
 
-# TODO: Need to find a better syntax file for hexdumps
-
 # kitty +kitten icat --transfer-mode file --clear
 
 optimize() {
@@ -105,13 +103,9 @@ application/x-xz)
     ;;
 application/gzip)
     case $1 in
-    *.tar.gz* | .tgz*)
-        tar -ztvf "$1" | optimize lsl
-        ;;
-    *)
-        gzip --uncompress -c "$1" | optimize log
-        # gzip -l "$1" | $HIGHLIGHT_CMD --syntax ls
-        ;;
+    *.tar.gz* | .tgz*) tar -ztvf "$1" | optimize lsl ;;
+    # gzip -l "$1" | $HIGHLIGHT_CMD --syntax ls
+    *) gzip --uncompress -c "$1" | optimize log ;;
     esac
     ;;
 application/x-bzip2)
