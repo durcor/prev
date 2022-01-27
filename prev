@@ -34,6 +34,7 @@ audio/*)
 video/*)
     tmp=$(mktemp -p /tmp prevffmpegthumbnailer.XXX.png)
     ffmpegthumbnailer -i "$1" -o "$tmp"
+    # TODO: Add support for more image previewers (kitty)
     chafa -c 256 "$tmp"
     mediainfo "$1" | optimize make
     rm "$tmp"
@@ -90,7 +91,11 @@ application/vnd.oasis.* | application/vnd.openxmlformats* | application/msword)
     parse csv "$1"
     ;;
 application/json)
-    jq <"$1" | optimize json
+    if jq_output="$(jq <"$1" 2>/dev/null)"; then
+        optimize json <"$jq_output"
+    else
+        nvimpager -c "$1"
+    fi
     ;;
 application/*sqlite3)
     sqlite3 "$1" .dump | optimize sql
@@ -115,7 +120,7 @@ application/x-bzip2)
 application/octet-stream | text/x-bytecode* | application/x-object | \
     application/x-pie-* | application/x-dos* | application/x-sharedlib | \
     application/x-msi | application/x-matlab-data | application/x-executable | \
-    application/x-hdf5)
+    application/x-hdf5 | application/x-chrome-extension | application/x-dmp)
     case "$(file -b "$1")" in
     "Apple binary property list")
         plistutil -i "$1" | optimize xml
@@ -151,7 +156,6 @@ application/x-tar)
     *)
         case "$(file -b "$1")" in
         "ASCII text, with very long lines"*)
-
             if jq_output="$(jq <"$1" 2>/dev/null)"; then
                 optimize json <"$jq_output"
             else
