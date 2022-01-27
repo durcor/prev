@@ -24,9 +24,7 @@ sudo make install
 ```
 
 ## Dependencies:
-- poppler
-- highlight
-- python-pygments
+- nvimpager (for better highlighting integration with nvim configs)
 - chafa
 - ffmpegthumbnailer
 - mediainfo
@@ -34,9 +32,6 @@ sudo make install
 - pandoc
 - p7zip
 - libcdio
-- sqlite3
 - unzip
 - jq
-
-### Optional Dependencies:
-- nvimpager (for better highlighting integration with your nvim config if you use it)
+- libreoffice
