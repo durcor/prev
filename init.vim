@@ -4,7 +4,6 @@ endif
 if empty(glob('$XDG_CONFIG_HOME'))
     let $XDG_CONFIG_HOME = glob('$HOME/.config')
 endif
-echo $HOME
 if empty(glob('$XDG_DATA_HOME/nvimpager/site/autoload/plug.vim'))
   silent !curl -fLo $XDG_DATA_HOME/nvimpager/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   au VimEnter * PlugInstall --sync | source $XDG_CONFIG_HOME/nvimpager/init.vim
@@ -53,6 +52,7 @@ au BufRead *.python* se ft=python
 au BufRead *.reg se ft=registry
 au BufRead *.mesh se ft=glsl
 au BufRead *.rbxm se ft=xml
+au BufRead *.vcf se ft=ls
 
 " use ls syntax highlighting for vimv buffers
 au BufRead /tmp/vimv.* se ft=ls | normal $T/
