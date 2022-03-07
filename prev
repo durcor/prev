@@ -117,6 +117,7 @@ application/x-bzip2)
     # NOTE: Get more verbose output with -v flag
     tar -jtvf "$1" | optimize lsl
     ;;
+    # TODO: Experiment with disassembling binaries
 application/octet-stream | text/x-bytecode* | application/x-object | \
     application/x-pie-* | application/x-dos* | application/x-sharedlib | \
     application/x-msi | application/x-matlab-data | application/x-executable | \
@@ -135,6 +136,9 @@ application/octet-stream | text/x-bytecode* | application/x-object | \
         echo $(strings "$1") | fold -w 80
         ;;
     esac
+    ;;
+application/vnd.tcpdump.pcap)
+    tshark -r "$1" | optimize log
     ;;
 application/x-tar)
     tar -tvf "$1" | optimize lsl
