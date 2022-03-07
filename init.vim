@@ -36,7 +36,7 @@ colorscheme wpgtk
 " File-type specific configuration
 au BufRead *.hex se ft=c
 " Better systemd/config file syntax highlighting
-au BufRead *.conf,*.cfg,*.service*,*.timer*,*.godot,config,*rc,*.info,*.cir,*.CIR,*.cmp se ft=dosini
+au BufRead *.conf,*.cfg,*.service*,*.timer*,*.godot,config,*rc,*.info,*.cir,*.CIR,*.cmp,*.import se ft=dosini
 au BufRead *.s,*.lst se ft=arm
 " I need syntax highlighting for my natural joins
 let g:sql_type_default = 'pgsql'
